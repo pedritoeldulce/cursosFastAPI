@@ -44,6 +44,23 @@ def create_course(course: Course):
     return {"courses": courses, "message":"course added"}
 
 
+@app.put('/courses/{id}')
+def update_course(data: Course, id: int):
+
+    # Busqueda por ID
+    courseFound = list(filter(lambda course: course.id == id, courses))
+
+    if courseFound:
+            
+        courseFound[0].name = data.name
+        courseFound[0].content = data.content
+        courseFound[0].category = data.category
+        courseFound[0].status = data.status
+
+        return {"course": courseFound, "message":"course updated"}
+
+    return {"message":"Course Not found"}
+
 @app.delete('/courses/{id}')
 def delete_course(id:int):
     userfound = list(filter(lambda course: course[0]["id"] == id, courses))
