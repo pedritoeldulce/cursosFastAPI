@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, status, Response, HTTPException
+from fastapi import FastAPI, status, Response, HTTPException, Request
 
 from typing import Optional, List
 from data import courses
@@ -10,6 +10,21 @@ from fastapi.responses import PlainTextResponse, JSONResponse
 from models.Course import Course
 
 app = FastAPI()
+
+# Middleware: es una funcion que funciona con cada solicitud antes de que sea procesada por cualquiera operacion
+#             de ruta especìfica. Y tambien con cada respuesta antes de devolverlo
+
+is_logged = False
+
+@app.middleware("http")
+async def check_logged(request: Request, call_next):
+    
+    if is_logged:
+        print(f"Accessing the route: {request.url}")
+        response = await call_next(request)
+        return response
+
+    return JSONResponse(status_code=401, content={"message":"Log in"})
 
 @app.get('/courses')
 def get_courses():
@@ -36,12 +51,10 @@ def get_content(id:int):
     
     courseFound = list(filter(lambda course: course.id == id, courses))
 
-    print(courseFound)
     if courseFound:
         
         return {"content":courseFound[0].content, "message":"course Found"}
         
-
     return {"message":"course not found"}
 
 
