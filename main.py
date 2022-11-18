@@ -1,11 +1,10 @@
 
 from fastapi import FastAPI, status, Response, HTTPException
-#import uvicorn
+
 from typing import Optional, List
 from data import courses
 
 from fastapi.responses import PlainTextResponse, JSONResponse
-
 
 # importamos la clase Course (modelo)
 from models.Course import Course
@@ -49,20 +48,26 @@ def get_content(id:int):
 @app.post('/courses')
 def create_course(course: Course):
 
-    # id nuevo a ingresar
-    n_id=course.id
+    # course: Curse: valores del nuevo curso que se va a ingresar. instancia course del tipo Course
+    # del objeto instanciado se obtiene los datos de content para luego hacer la comparacion con nuestra lista
+   
+    new_content = course.content  # Guargamos el valor de content para luego compararlo en el filtere
 
-    # compara con las lista de ID de la lista courses
-    courseFound = list(filter(lambda course: course.id == n_id, courses))
+    # coursesFound contiene una lista con los valores similares a new_content
+    coursesFound = list(filter(lambda course: course.content == new_content, courses))
 
-    if courseFound is not None:
-        raise HTTPException(status_code=400, detail="Duplicate id")
+    # buscamos si el contenido del curso es similar a alguno de la lista
+    for course in coursesFound:
+        if course.content == new_content:
+            raise HTTPException(status_code = 400, detail="Content duplicate")
 
+    # campo name es obligatorio, debe tener valor
     if len(course.name) == 0:
         raise HTTPException(status_code=400, detail="field name required")
 
-    
-    
+    if len(course.category) == 0:
+        raise HTTPException(status_code=400, detail="field category required")
+
     courses.append(course)    
     #return {"courses": courses, "message":"course added"}
     #return PlainTextResponse(status_code=201, content="course registed")
